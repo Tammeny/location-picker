@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- 删除苹果默认的工具栏和菜单栏 -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <!-- 设置苹果工具栏颜色 -->
+    <!-- 启用360浏览器的极速模式(webkit) -->
+    <meta name="renderer" content="webkit">
+    <!-- 避免IE使用兼容模式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- 针对手持设备优化，主要是针对一些老的不识别viewport的浏览器，比如黑莓 -->
+    <meta name="HandheldFriendly" content="true">
+    <!-- 微软的老式浏览器 -->
+    <meta name="MobileOptimized" content="320">
+    <!-- uc强制竖屏 -->
+    <meta name="screen-orientation" content="portrait">
+    <!-- QQ强制竖屏 -->
+    <meta name="x5-orientation" content="portrait">
+    <!-- UC应用模式 -->
+    <meta name="browsermode" content="application">
+    <!-- QQ应用模式 -->
+    <meta name="x5-page-mode" content="app">
+    <!-- windows phone 点击无高光 -->
+    <meta name="msapplication-tap-highlight" content="no">
+    <!-- 适应移动端end -->
+    <title>百度地图拖拽选址</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=这里填写你的key"></script>
+    <style type="text/css">
+    html,
+    body {
+        height: 100%;
+    }
+    
+    body {
+        font-size: 24px;
+        margin: 0;
+        font-family: "微软雅黑";
+        padding: 0;
+    }
+    
+    #container {
+        margin-right: 10px;
+        width: 100%;
+        height: 60%;
+        overflow: hidden;
+    }
+    
+    #info {
+        width: 100%;
+        height: 40%;
+        overflow-y: scroll;
+        font-size: 12px;
+        z-index: 10001;
+        background: #fff;
+        color: #000;
+        text-align: left;
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        bottom: 0;
+        border-top: 1px solid #ddd;
+    }
+    
+    #info li {
+        border-bottom: 1px solid #ddd;
+    }
+    
+    #info h4 {
+        margin-bottom: 5px;
+    }
+    
+    #info p {
+        margin-top: 5px;
+        color: #666;
+    }
+    
+    #info h4,
+    #info p {
+        padding: 0 10px;
+    }
+    
+    #pointer {
+        color: #000;
+        text-align: center;
+        left: 50%;
+        top: 30%;
+        position: absolute;
+        -webkit-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        -o-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        z-index: 10001;
+        font-size: 28px;
+    }
+    
+    .search {
+        position: absolute;
+        top: 0;
+        font-size: 12px;
+        padding: 10px 0;
+        z-index: 10001;
+        text-align: center;
+        width: 100%;
+        background: #fff;
+    }
+    
+    .search input {
+        height: 25px;
+        outline: none;
+    }
+    
+    .tangram-suggestion-main {
+        top: 41px!important;
+        z-index: 10002;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="search">
+        <div id="r-result">
+            <input type="text" id="suggestId" size="20" value="" style="width:95%;" placeholder="请输入关键字" />
+        </div>
+        <div id="searchResultPanel" style="border:1px solid #C0C0C0;height:auto; display:none;"></div>
+    </div>
+    <div id="pointer">x</div>
+    <div id="container"></div>
+    <ul id="info">
+    </ul>
+    <script type="text/javascript">
+    var geolocation = new BMap.Geolocation();
+    var currentLng = 113.421931,
+        currentLat = 23.173148;
+    geolocation.getCurrentPosition(function(r) {
+        if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+            map.panTo(r.point);
+            currentLng = r.point.lng;
+            currentLat = r.point.lat;
+        } else {
+            alert('failed' + this.getStatus());
+        }
+    }, {
+        enableHighAccuracy: true
+    });
+    var map = new BMap.Map("container");
+    var mPoint = new BMap.Point(currentLng, currentLat);
+    map.centerAndZoom(mPoint, 16);
+    map.addControl(new BMap.NavigationControl({
+        type: BMAP_NAVIGATION_CONTROL_SMALL
+    }));
+    map.enableScrollWheelZoom();
+
+    var mOption = {
+        poiRadius: 1000, //半径为1000米内的POI,默认100米
+        numPois: 10 //列举出10个POI,默认10个
+    }
+    map.addEventListener("moveend", function(e) { //鼠标拖动事件  
+        var gc = new BMap.Geocoder();
+        gc.getLocation(new BMap.Point(map.getCenter().lng, map.getCenter().lat),
+            function mCallback(rs) {
+                var allPois = rs.surroundingPois; //获取全部POI（该点半径为100米内有6个POI点）
+                var poisList = "";
+                for (i = 0; i < allPois.length; ++i) {
+                    console.info(allPois[i].title + "，" + allPois[i].address);
+                    poisList += "<li><h4>" + allPois[i].title + "</h4><p>" + allPois[i].address + "</p></li>";
+                }
+                document.getElementById("info").innerHTML = poisList;
+            }, mOption
+        );
+    });
+
+    function G(id) {
+        return document.getElementById(id);
+    }
+    var ac = new BMap.Autocomplete( //建立一个自动完成的对象
+        {
+            "input": "suggestId",
+            "location": map
+        });
+
+    ac.addEventListener("onhighlight", function(e) { //鼠标放在下拉列表上的事件
+        var str = "";
+        var _value = e.fromitem.value;
+        var value = "";
+        if (e.fromitem.index > -1) {
+            value = _value.province + _value.city + _value.district + _value.street + _value.business;
+        }
+        str = "FromItem<br />index = " + e.fromitem.index + "<br />value = " + value;
+
+        value = "";
+        if (e.toitem.index > -1) {
+            _value = e.toitem.value;
+            value = _value.province + _value.city + _value.district + _value.street + _value.business;
+        }
+        str += "<br />ToItem<br />index = " + e.toitem.index + "<br />value = " + value;
+        G("searchResultPanel").innerHTML = str;
+    });
+
+    var myValue;
+    ac.addEventListener("onconfirm", function(e) { //鼠标点击下拉列表后的事件
+        var _value = e.item.value;
+        myValue = _value.province + _value.city + _value.district + _value.street + _value.business;
+        G("searchResultPanel").innerHTML = "onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+
+        setPlace();
+    });
+
+    function setPlace() {
+        function myFun() {
+            var pp = local.getResults().getPoi(0).point; //获取第一个智能搜索的结果
+            map.centerAndZoom(pp, 18);
+        }
+        var local = new BMap.LocalSearch(map, { //智能搜索
+            onSearchComplete: myFun
+        });
+        local.search(myValue);
+    }
+    </script>
+</body>
+
+</html>
