@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Locationpicker by TAMMENY</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Locationpicker</h1>
+      <h2 class="project-tagline">百度地图指针选址</h2>
+      <a href="https://github.com/TAMMENY/LocationPicker" class="btn">View on GitHub</a>
+      <a href="https://github.com/TAMMENY/LocationPicker/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/TAMMENY/LocationPicker/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "<a href="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd%22%3E">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;</a>
+</p>
+
+<p></p>
+    
+    
+    
+    &lt;!-- 删除苹果默认的工具栏和菜单栏 --&gt;
+    
+    &lt;!-- 设置苹果工具栏颜色 --&gt;
+    &lt;!-- 启用360浏览器的极速模式(webkit) --&gt;
+    
+    &lt;!-- 避免IE使用兼容模式 --&gt;
+    
+    &lt;!-- 针对手持设备优化，主要是针对一些老的不识别viewport的浏览器，比如黑莓 --&gt;
+    
+    &lt;!-- 微软的老式浏览器 --&gt;
+    
+    &lt;!-- uc强制竖屏 --&gt;
+    
+    &lt;!-- QQ强制竖屏 --&gt;
+    
+    &lt;!-- UC应用模式 --&gt;
+    
+    &lt;!-- QQ应用模式 --&gt;
+    
+    &lt;!-- windows phone 点击无高光 --&gt;
+    
+    &lt;!-- 适应移动端end --&gt;
+    百度地图拖拽选址
+    
+    
+    html,
+    body {
+        height: 100%;
+    }&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;body {
+    font-size: 24px;
+    margin: 0;
+    font-family: &amp;quot;微软雅黑&amp;quot;;
+    padding: 0;
+}
+
+#container {
+    margin-right: 10px;
+    width: 100%;
+    height: 60%;
+    overflow: hidden;
+}
+
+#info {
+    width: 100%;
+    height: 40%;
+    overflow-y: scroll;
+    font-size: 12px;
+    z-index: 10001;
+    background: #fff;
+    color: #000;
+    text-align: left;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    bottom: 0;
+    border-top: 1px solid #ddd;
+}
+
+#info li {
+    border-bottom: 1px solid #ddd;
+}
+
+#info h4 {
+    margin-bottom: 5px;
+}
+
+#info p {
+    margin-top: 5px;
+    color: #666;
+}
+
+#info h4,
+#info p {
+    padding: 0 10px;
+}
+
+#pointer {
+    color: #000;
+    text-align: center;
+    left: 50%;
+    top: 30%;
+    position: absolute;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    z-index: 10001;
+    font-size: 28px;
+}
+
+.search {
+    position: absolute;
+    top: 0;
+    font-size: 12px;
+    padding: 10px 0;
+    z-index: 10001;
+    text-align: center;
+    width: 100%;
+    background: #fff;
+}
+
+.search input {
+    height: 25px;
+    outline: none;
+}
+
+.tangram-suggestion-main {
+    top: 41px!important;
+    z-index: 10002;
+}
+&amp;lt;/style&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;/head&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;body&gt;
+    &lt;div class="search"&gt;
+        &lt;div id="r-result"&gt;
+            &lt;input type="text" id="suggestId" size="20" value="" style="width:95%;" placeholder="请输入关键字" /&gt;
+        &lt;/div&gt;
+        &lt;div id="searchResultPanel" style="border:1px solid #C0C0C0;height:auto; display:none;"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div id="pointer"&gt;x&lt;/div&gt;
+    &lt;div id="container"&gt;&lt;/div&gt;
+    &lt;ul id="info"&gt;
+    &lt;/ul&gt;
+    &lt;script type="text/javascript"&gt;
+    var geolocation = new BMap.Geolocation();
+    var currentLng = 113.421931,
+        currentLat = 23.173148;
+    geolocation.getCurrentPosition(function(r) {
+        if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+            map.panTo(r.point);
+            currentLng = r.point.lng;
+            currentLat = r.point.lat;
+        } else {
+            alert(&amp;#39;failed&amp;#39; + this.getStatus());
+        }
+    }, {
+        enableHighAccuracy: true
+    });
+    var map = new BMap.Map(&amp;quot;container&amp;quot;);
+    var mPoint = new BMap.Point(currentLng, currentLat);
+    map.centerAndZoom(mPoint, 16);
+    map.addControl(new BMap.NavigationControl({
+        type: BMAP_NAVIGATION_CONTROL_SMALL
+    }));
+    map.enableScrollWheelZoom();
+    var mOption = {
+        poiRadius: 1000, //半径为1000米内的POI,默认100米
+        numPois: 10 //列举出10个POI,默认10个
+    }
+    map.addEventListener(&amp;quot;moveend&amp;quot;, function(e) { //鼠标拖动事件&lt;br&gt;
+        var gc = new BMap.Geocoder();
+        gc.getLocation(new BMap.Point(map.getCenter().lng, map.getCenter().lat),
+            function mCallback(rs) {
+                var allPois = rs.surroundingPois; //获取全部POI（该点半径为100米内有6个POI点）
+                var poisList = &amp;quot;&amp;quot;;
+                for (i = 0; i &amp;lt; allPois.length; ++i) {
+                    console.info(allPois[i].title + &amp;quot;，&amp;quot; + allPois[i].address);
+                    poisList += &amp;quot;&lt;li&gt;&lt;h4&gt;&amp;quot; + allPois[i].title + &amp;quot;&lt;/h4&gt;&lt;p&gt;&amp;quot; + allPois[i].address + &amp;quot;&lt;/p&gt;&lt;/li&gt;&amp;quot;;
+                }
+                document.getElementById(&amp;quot;info&amp;quot;).innerHTML = poisList;
+            }, mOption
+        );
+    });
+    function G(id) {
+        return document.getElementById(id);
+    }
+    var ac = new BMap.Autocomplete( //建立一个自动完成的对象
+        {
+            &amp;quot;input&amp;quot;: &amp;quot;suggestId&amp;quot;,
+            &amp;quot;location&amp;quot;: map
+        });
+    ac.addEventListener(&amp;quot;onhighlight&amp;quot;, function(e) { //鼠标放在下拉列表上的事件
+        var str = &amp;quot;&amp;quot;;
+        var _value = e.fromitem.value;
+        var value = &amp;quot;&amp;quot;;
+        if (e.fromitem.index &amp;gt; -1) {
+            value = _value.province + _value.city + _value.district + _value.street + _value.business;
+        }
+        str = &amp;quot;FromItem&lt;br /&gt;index = &amp;quot; + e.fromitem.index + &amp;quot;&lt;br /&gt;value = &amp;quot; + value;
+        value = &amp;quot;&amp;quot;;
+        if (e.toitem.index &amp;gt; -1) {
+            _value = e.toitem.value;
+            value = _value.province + _value.city + _value.district + _value.street + _value.business;
+        }
+        str += &amp;quot;&lt;br /&gt;ToItem&lt;br /&gt;index = &amp;quot; + e.toitem.index + &amp;quot;&lt;br /&gt;value = &amp;quot; + value;
+        G(&amp;quot;searchResultPanel&amp;quot;).innerHTML = str;
+    });
+    var myValue;
+    ac.addEventListener(&amp;quot;onconfirm&amp;quot;, function(e) { //鼠标点击下拉列表后的事件
+        var _value = e.item.value;
+        myValue = _value.province + _value.city + _value.district + _value.street + _value.business;
+        G(&amp;quot;searchResultPanel&amp;quot;).innerHTML = &amp;quot;onconfirm&lt;br /&gt;index = &amp;quot; + e.item.index + &amp;quot;&lt;br /&gt;myValue = &amp;quot; + myValue;
+        setPlace();
+    });
+    function setPlace() {
+        function myFun() {
+            var pp = local.getResults().getPoi(0).point; //获取第一个智能搜索的结果
+            map.centerAndZoom(pp, 18);
+        }
+        var local = new BMap.LocalSearch(map, { //智能搜索
+            onSearchComplete: myFun
+        });
+        local.search(myValue);
+    }
+    &lt;/script&gt;
+&lt;/body&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;/html&gt;&lt;/p&gt;
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/TAMMENY/LocationPicker">Locationpicker</a> is maintained by <a href="https://github.com/TAMMENY">TAMMENY</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
