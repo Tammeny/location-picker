@@ -1,5 +1,5 @@
 # Location Picker
-百度地图指针选址
+基于百度地图实现的指针选址
 
 ### 演示
    http://www.tammeny.com/location-picker.html
