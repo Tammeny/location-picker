@@ -1,4 +1,4 @@
-# LocationPicker
+# Location Picker
 百度地图指针选址
 
 ### DEMO
