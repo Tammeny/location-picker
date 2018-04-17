@@ -2,7 +2,7 @@
 百度地图指针选址
 
 ### DEMO
-   https://tammeny.github.io/LocationPicker/
+   http://www.tammeny.com/location-picker.html
 ### 功能
 1. 自动定位；
 2. 输入关键字自动搜索；
