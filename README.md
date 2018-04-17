@@ -1,8 +1,8 @@
 # Location Picker
 百度地图指针选址
 
-### DEMO
-   http://www.tammeny.com/location-picker.html
+### 演示
+   http://www.tammeny.com/location-picker.html
 ### 功能
 1. 自动定位；
 2. 输入关键字自动搜索；
